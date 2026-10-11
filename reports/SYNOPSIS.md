@@ -1,7 +1,7 @@
 # Project Synopsis
 
 **Title:** BankSmart AI: Predicting Term-Deposit Subscription in Bank Telemarketing with Explainable Machine Learning
-**Submitted by:** *[Name(s), roll number(s)]*  **Guide:** *[Name, designation]*  **Department:** *[Department, college]*  **Year:** *[YYYY-YY]*
+**Submitted by:** *NISCHAY SINGH*
 
 ## 1. Introduction
 Banks phone customers to offer term deposits, but most calls do not lead to a subscription. A model that estimates each customer's
