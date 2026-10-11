@@ -10,8 +10,8 @@ Runs fully locally: no paid APIs, no cloud accounts, no secrets.
 > made. The dataset is ordered by date but the main evaluation uses a random split, so the headline numbers are
 > optimistic for forecasting a future campaign (see *Limitations*, and `reports/FINAL_REPORT.md`).
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/<your-username>/<repo-name>/blob/main/notebooks/BankSmart_AI_Colab.ipynb)
-*(after you push to GitHub, replace `<your-username>` and `<repo-name>` in the badge link above)*
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/<Nischay_S>/<Bank-Term-Deposit>/blob/main/notebooks/BankSmart_AI_Colab.ipynb)
+
 
 ## Two scenarios
 
