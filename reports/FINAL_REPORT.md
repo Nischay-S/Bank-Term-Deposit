@@ -10,12 +10,11 @@
 | | |
 |---|---|
 | **Project title** | BankSmart AI: Predicting Term-Deposit Subscription in Bank Telemarketing with Explainable Machine Learning |
-| **Submitted by** | *[Student name(s), roll number(s)]* |
-| **Programme / branch** | *[B.Tech / B.E. in ..., Artificial Intelligence and Machine Learning]* |
-| **Guide** | *[Name, designation]* |
-| **Department / institution** | *[Department, college, university]* |
-| **Academic year** | *[YYYY-YY]* |
-| **Date of submission** | *[Date]* |
+| **Submitted by** | *[NISCHAY SINGH]* |
+| **Programme / branch** | *[B.Tech- COMPUTER & COMMUNICATON ENG* |
+| **Institution** | *[MANIPAL UNIVERSITY JAIPUR]* |
+| **Academic year** | *[2026-2027]* |
+| **Date of submission** | *[15/10/2026]* |
 
 ---
 
