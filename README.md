@@ -103,36 +103,10 @@ data/raw/                   put bank_marketing.csv here (git-ignored)
 * **Honest explanations:** SHAP contributions describe model behaviour, not causes.
 
 
-**Create the repository**
-4. On GitHub click **+ -> New repository**. Name it (for example `banksmart-ai`), choose **Public** (needed for the
-   simplest Colab and Streamlit Cloud links), and leave "Add a README", ".gitignore" and "license" **unticked** (the
-   project already has them). Click **Create repository** and copy the HTTPS URL it shows.
 
-**Push the project** (in PowerShell, from the project folder that contains `app.py`)
-5. ```powershell
-   git init
-   git add .
-   git status
-   ```
    Check the list: `data/raw/bank_marketing.csv`, `venv/` and `__pycache__/` must **not** appear (they are ignored).
    `artifacts/`, `notebooks/`, `reports/`, `src/`, `pages/`, `tests/` should.
-6. ```powershell
-   git commit -m "BankSmart AI: initial commit"
-   git branch -M main
-   git remote add origin https://github.com/<your-username>/<repo-name>.git
-   git push -u origin main
-   ```
-7. **Sign-in.** GitHub no longer accepts your account password for Git. When prompted, a browser window normally opens
-   (Git Credential Manager) - just sign in. If you are asked for a password in the terminal, create a **personal access
-   token** at GitHub -> Settings -> Developer settings -> Personal access tokens (with "repo" scope) and paste it as the
-   password. Alternatives: **GitHub Desktop** (https://desktop.github.com, no commands needed) or the GitHub CLI (`gh auth login`).
-8. Refresh the repository page: your files should be there. Edit the Colab badge URL in `README.md` (replace
-   `<your-username>` and `<repo-name>`), then publish the change:
-   ```powershell
-   git add README.md
-   git commit -m "Fix Colab badge link"
-   git push
-   ```
+
 
 **Later changes:** `git add .` then `git commit -m "describe the change"` then `git push`.
 
