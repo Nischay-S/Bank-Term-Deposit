@@ -1,0 +1,97 @@
+{
+  "scenario": "pre_call",
+  "assumption": "file order == time order (UCI documents date ordering)",
+  "n_month_runs": 30,
+  "month_runs_head": [
+    [
+      "may",
+      7957
+    ],
+    [
+      "jun",
+      4486
+    ],
+    [
+      "jul",
+      6380
+    ],
+    [
+      "aug",
+      5215
+    ],
+    [
+      "oct",
+      80
+    ],
+    [
+      "nov",
+      3598
+    ],
+    [
+      "dec",
+      13
+    ],
+    [
+      "jan",
+      1176
+    ],
+    [
+      "feb",
+      2296
+    ],
+    [
+      "mar",
+      258
+    ],
+    [
+      "apr",
+      2718
+    ],
+    [
+      "may",
+      5575
+    ]
+  ],
+  "prevalence": {
+    "train": 0.05039445550394456,
+    "val": 0.11789427117894272,
+    "test": 0.31582439455932765
+  },
+  "months_in_test_block": [
+    "apr",
+    "aug",
+    "dec",
+    "feb",
+    "jan",
+    "jul",
+    "jun",
+    "mar",
+    "may",
+    "nov",
+    "oct",
+    "sep"
+  ],
+  "months_in_train_block": [
+    "aug",
+    "jul",
+    "jun",
+    "may",
+    "nov",
+    "oct"
+  ],
+  "temporal": {
+    "val_pr_auc": 0.1281737961791939,
+    "val_roc_auc": 0.5508783032963808,
+    "test_pr_auc": 0.4174390522799077,
+    "test_roc_auc": 0.631428581615287,
+    "threshold": 0.02940709144577378,
+    "test_precision": 0.33383327084114484,
+    "test_recall": 0.9352240896358543
+  },
+  "random_split_reference": {
+    "test_pr_auc": 0.4553371020145393,
+    "test_roc_auc": 0.8009465408321133,
+    "selected_model": "hist_gradient_boosting"
+  },
+  "note": "Model here is default HistGradientBoosting trained without calibration; the reference is the final calibrated model."
+}

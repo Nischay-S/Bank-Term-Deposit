@@ -1,0 +1,331 @@
+{
+  "n_rows": 45211,
+  "n_input_features": 16,
+  "n_positive": 5289,
+  "prevalence": 0.11698480458295547,
+  "split_sizes": {
+    "train": 27126,
+    "validation": 9042,
+    "test": 9043
+  },
+  "unknown_share": {
+    "job": 0.006370131162770122,
+    "education": 0.04107407489327818,
+    "contact": 0.28798301298356593,
+    "poutcome": 0.8174780473778506
+  },
+  "never_previously_contacted_share": 0.8173674548229414,
+  "rates_by_category": {
+    "job": [
+      {
+        "category": "blue-collar",
+        "n": 9732,
+        "rate": 0.07274969173859433
+      },
+      {
+        "category": "management",
+        "n": 9458,
+        "rate": 0.13755550856417847
+      },
+      {
+        "category": "technician",
+        "n": 7597,
+        "rate": 0.11056996182703699
+      },
+      {
+        "category": "admin.",
+        "n": 5171,
+        "rate": 0.12202668729452718
+      },
+      {
+        "category": "services",
+        "n": 4154,
+        "rate": 0.08883004333172845
+      },
+      {
+        "category": "retired",
+        "n": 2264,
+        "rate": 0.22791519434628976
+      },
+      {
+        "category": "self-employed",
+        "n": 1579,
+        "rate": 0.11842938568714376
+      },
+      {
+        "category": "entrepreneur",
+        "n": 1487,
+        "rate": 0.08271687962340282
+      },
+      {
+        "category": "unemployed",
+        "n": 1303,
+        "rate": 0.15502686108979277
+      },
+      {
+        "category": "housemaid",
+        "n": 1240,
+        "rate": 0.08790322580645162
+      },
+      {
+        "category": "student",
+        "n": 938,
+        "rate": 0.2867803837953092
+      },
+      {
+        "category": "unknown",
+        "n": 288,
+        "rate": 0.11805555555555555
+      }
+    ],
+    "marital": [
+      {
+        "category": "married",
+        "n": 27214,
+        "rate": 0.10123465863158668
+      },
+      {
+        "category": "single",
+        "n": 12790,
+        "rate": 0.1494917904612979
+      },
+      {
+        "category": "divorced",
+        "n": 5207,
+        "rate": 0.11945458037257538
+      }
+    ],
+    "education": [
+      {
+        "category": "secondary",
+        "n": 23202,
+        "rate": 0.10559434531505904
+      },
+      {
+        "category": "tertiary",
+        "n": 13301,
+        "rate": 0.15006390496955116
+      },
+      {
+        "category": "primary",
+        "n": 6851,
+        "rate": 0.08626477886439936
+      },
+      {
+        "category": "unknown",
+        "n": 1857,
+        "rate": 0.13570274636510501
+      }
+    ],
+    "default": [
+      {
+        "category": "no",
+        "n": 44396,
+        "rate": 0.11796107757455626
+      },
+      {
+        "category": "yes",
+        "n": 815,
+        "rate": 0.0638036809815951
+      }
+    ],
+    "housing": [
+      {
+        "category": "yes",
+        "n": 25130,
+        "rate": 0.07699960206923995
+      },
+      {
+        "category": "no",
+        "n": 20081,
+        "rate": 0.1670235546038544
+      }
+    ],
+    "loan": [
+      {
+        "category": "no",
+        "n": 37967,
+        "rate": 0.12655727342165565
+      },
+      {
+        "category": "yes",
+        "n": 7244,
+        "rate": 0.06681391496410823
+      }
+    ],
+    "contact": [
+      {
+        "category": "cellular",
+        "n": 29285,
+        "rate": 0.14918900460986853
+      },
+      {
+        "category": "unknown",
+        "n": 13020,
+        "rate": 0.040706605222734255
+      },
+      {
+        "category": "telephone",
+        "n": 2906,
+        "rate": 0.13420509291121818
+      }
+    ],
+    "month": [
+      {
+        "category": "jan",
+        "n": 1403,
+        "rate": 0.10121168923734854
+      },
+      {
+        "category": "feb",
+        "n": 2649,
+        "rate": 0.1664779161947905
+      },
+      {
+        "category": "mar",
+        "n": 477,
+        "rate": 0.519916142557652
+      },
+      {
+        "category": "apr",
+        "n": 2932,
+        "rate": 0.19679399727148705
+      },
+      {
+        "category": "may",
+        "n": 13766,
+        "rate": 0.06719453726572715
+      },
+      {
+        "category": "jun",
+        "n": 5341,
+        "rate": 0.10222804718217562
+      },
+      {
+        "category": "jul",
+        "n": 6895,
+        "rate": 0.09093546047860769
+      },
+      {
+        "category": "aug",
+        "n": 6247,
+        "rate": 0.11013286377461182
+      },
+      {
+        "category": "sep",
+        "n": 579,
+        "rate": 0.46459412780656306
+      },
+      {
+        "category": "oct",
+        "n": 738,
+        "rate": 0.43766937669376693
+      },
+      {
+        "category": "nov",
+        "n": 3970,
+        "rate": 0.10151133501259446
+      },
+      {
+        "category": "dec",
+        "n": 214,
+        "rate": 0.4672897196261682
+      }
+    ],
+    "poutcome": [
+      {
+        "category": "unknown",
+        "n": 36959,
+        "rate": 0.09161503287426608
+      },
+      {
+        "category": "failure",
+        "n": 4901,
+        "rate": 0.1260967149561314
+      },
+      {
+        "category": "other",
+        "n": 1840,
+        "rate": 0.16684782608695653
+      },
+      {
+        "category": "success",
+        "n": 1511,
+        "rate": 0.6472534745201853
+      }
+    ]
+  },
+  "numeric_summary": {
+    "age": {
+      "count": 45211.0,
+      "mean": 40.94,
+      "std": 10.62,
+      "min": 18.0,
+      "25%": 33.0,
+      "50%": 39.0,
+      "75%": 48.0,
+      "max": 95.0
+    },
+    "balance": {
+      "count": 45211.0,
+      "mean": 1362.27,
+      "std": 3044.77,
+      "min": -8019.0,
+      "25%": 72.0,
+      "50%": 448.0,
+      "75%": 1428.0,
+      "max": 102127.0
+    },
+    "day": {
+      "count": 45211.0,
+      "mean": 15.81,
+      "std": 8.32,
+      "min": 1.0,
+      "25%": 8.0,
+      "50%": 16.0,
+      "75%": 21.0,
+      "max": 31.0
+    },
+    "duration": {
+      "count": 45211.0,
+      "mean": 258.16,
+      "std": 257.53,
+      "min": 0.0,
+      "25%": 103.0,
+      "50%": 180.0,
+      "75%": 319.0,
+      "max": 4918.0
+    },
+    "campaign": {
+      "count": 45211.0,
+      "mean": 2.76,
+      "std": 3.1,
+      "min": 1.0,
+      "25%": 1.0,
+      "50%": 2.0,
+      "75%": 3.0,
+      "max": 63.0
+    },
+    "pdays": {
+      "count": 45211.0,
+      "mean": 40.2,
+      "std": 100.13,
+      "min": -1.0,
+      "25%": -1.0,
+      "50%": -1.0,
+      "75%": -1.0,
+      "max": 871.0
+    },
+    "previous": {
+      "count": 45211.0,
+      "mean": 0.58,
+      "std": 2.3,
+      "min": 0.0,
+      "25%": 0.0,
+      "50%": 0.0,
+      "75%": 0.0,
+      "max": 275.0
+    }
+  },
+  "source": "UCI Machine Learning Repository, Bank Marketing (dataset 222), CC BY 4.0; Moro, Cortez & Rita (2014)"
+}

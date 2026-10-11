@@ -1,0 +1,168 @@
+{
+  "created_utc": "2026-10-11T11:03:56+00:00",
+  "scenario": "pre_call",
+  "target": "y",
+  "positive_label": "yes",
+  "input_features": [
+    "age",
+    "balance",
+    "day",
+    "campaign",
+    "pdays",
+    "previous",
+    "job",
+    "marital",
+    "education",
+    "default",
+    "housing",
+    "loan",
+    "contact",
+    "month",
+    "poutcome"
+  ],
+  "excluded_features": [
+    "duration"
+  ],
+  "selected_model": "hist_gradient_boosting",
+  "calibration_method": "none",
+  "selection_metric": "validation pr_auc",
+  "threshold": 0.1126118827022342,
+  "threshold_objective": "maximise F2 on validation data",
+  "validation_fbeta_at_threshold": 0.5569600252804552,
+  "metrics_validation": {
+    "threshold": 0.1126118827022342,
+    "roc_auc": 0.8038340977796803,
+    "pr_auc": 0.480926222771318,
+    "precision": 0.3361945636623748,
+    "recall": 0.666351606805293,
+    "f1": 0.4469096671949287,
+    "balanced_accuracy": 0.7460014547052518,
+    "accuracy": 0.8070117230701173,
+    "brier": 0.07940064787142925,
+    "log_loss": 0.2792782526939247,
+    "ece": 0.007731850490381136,
+    "n_predicted_positive": 2097,
+    "prevalence": 0.11700951117009512,
+    "tn": 6592,
+    "fp": 1392,
+    "fn": 353,
+    "tp": 705
+  },
+  "metrics_test": {
+    "threshold": 0.1126118827022342,
+    "roc_auc": 0.8009465408321133,
+    "pr_auc": 0.4553371020145393,
+    "precision": 0.324964471814306,
+    "recall": 0.6483931947069943,
+    "f1": 0.43294414641842854,
+    "balanced_accuracy": 0.7349667914674609,
+    "accuracy": 0.8012827601459692,
+    "brier": 0.08099169965403055,
+    "log_loss": 0.2830746369855479,
+    "ece": 0.009156888138365385,
+    "n_predicted_positive": 2111,
+    "prevalence": 0.11699657193409267,
+    "tn": 6560,
+    "fp": 1425,
+    "fn": 372,
+    "tp": 686
+  },
+  "test_bootstrap_ci_95": {
+    "roc_auc": {
+      "point": 0.8009465408321133,
+      "low": 0.7854990031245257,
+      "high": 0.8163385439003447
+    },
+    "pr_auc": {
+      "point": 0.4553371020145393,
+      "low": 0.42374461425679205,
+      "high": 0.48871705043621055
+    },
+    "precision": {
+      "point": 0.324964471814306,
+      "low": 0.30502763134630073,
+      "high": 0.34471856415136315
+    },
+    "recall": {
+      "point": 0.6483931947069943,
+      "low": 0.6191387559808612,
+      "high": 0.6766330750584484
+    },
+    "f1": {
+      "point": 0.43294414641842854,
+      "low": 0.41210857015573665,
+      "high": 0.4536074040339913
+    }
+  },
+  "classification_report_test": {
+    "not_subscribed": {
+      "precision": 0.9463358338141951,
+      "recall": 0.8215403882279274,
+      "f1-score": 0.879533418247637,
+      "support": 7985.0
+    },
+    "subscribed": {
+      "precision": 0.324964471814306,
+      "recall": 0.6483931947069943,
+      "f1-score": 0.43294414641842854,
+      "support": 1058.0
+    },
+    "accuracy": 0.8012827601459692,
+    "macro avg": {
+      "precision": 0.6356501528142505,
+      "recall": 0.7349667914674609,
+      "f1-score": 0.6562387823330328,
+      "support": 9043.0
+    },
+    "weighted avg": {
+      "precision": 0.87363751456219,
+      "recall": 0.8012827601459692,
+      "f1-score": 0.8272840043810769,
+      "support": 9043.0
+    }
+  },
+  "tuning": {
+    "random_forest_tuned": {
+      "best_params": {
+        "min_samples_leaf": 5,
+        "max_features": "sqrt",
+        "max_depth": 16
+      },
+      "inner_cv_pr_auc": 0.42304123326294985,
+      "n_iter": 5
+    },
+    "hist_gradient_boosting_tuned": {
+      "best_params": {
+        "min_samples_leaf": 100,
+        "max_leaf_nodes": 15,
+        "max_iter": 300,
+        "learning_rate": 0.05,
+        "l2_regularization": 10.0,
+        "class_weight": null
+      },
+      "inner_cv_pr_auc": 0.43210559809363286,
+      "n_iter": 5
+    }
+  },
+  "training_config": {
+    "seed": 42,
+    "cv_folds": 5,
+    "val_size": 0.2,
+    "test_size": 0.2,
+    "fast_mode": false,
+    "n_train": 27126,
+    "n_val": 9042,
+    "n_test": 9043
+  },
+  "environment": {
+    "python": "3.12.3",
+    "platform": "Linux-6.18.44-fc-v114-x86_64-with-glibc2.39",
+    "numpy": "2.4.4",
+    "pandas": "3.0.2",
+    "scikit-learn": "1.8.0",
+    "imbalanced-learn": "0.14.2",
+    "joblib": "1.5.3",
+    "shap": "0.53.0"
+  },
+  "train_seconds": 223.2
+}

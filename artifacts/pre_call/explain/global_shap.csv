@@ -1,0 +1,18 @@
+feature,mean_abs_shap,label
+contact,0.4285797483202938,contact channel
+month,0.2624066050618347,month contacted
+poutcome,0.16795624841041043,previous campaign outcome
+balance,0.1457585116863333,account balance
+housing,0.1410050573673164,housing loan
+day,0.13573092405086576,day of month contacted
+marital,0.13549178855783756,marital status
+campaign,0.100358190548407,contacts this campaign
+age,0.09171455805331201,age
+pdays,0.053008704744577854,days since previous campaign contact
+education,0.0507113457144486,education level
+job,0.044911658938296344,occupation
+loan,0.03917864101637783,personal loan
+previous,0.018673916857216245,contacts before this campaign
+default,0.0002656882586468351,credit in default
+negative_balance,0.0,negative balance (flag)
+previously_contacted,0.0,previously contacted (flag)

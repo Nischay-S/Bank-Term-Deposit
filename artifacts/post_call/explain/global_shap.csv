@@ -1,0 +1,19 @@
+feature,mean_abs_shap,label
+duration,1.3834831578873368,last call duration (s)
+contact,0.5875327437252768,contact channel
+month,0.4582920127317466,month contacted
+housing,0.19596868226460964,housing loan
+poutcome,0.14895249676604436,previous campaign outcome
+day,0.14616427368481896,day of month contacted
+campaign,0.14575097654985206,contacts this campaign
+balance,0.11643082955208385,account balance
+marital,0.10361746109395426,marital status
+education,0.09801408468837328,education level
+age,0.08754111227611143,age
+pdays,0.08106925917743277,days since previous campaign contact
+loan,0.05288021244221757,personal loan
+job,0.04569187010543767,occupation
+previous,0.026200073374220634,contacts before this campaign
+negative_balance,0.025433670539804113,negative balance (flag)
+default,0.002235042396416501,credit in default
+previously_contacted,0.0,previously contacted (flag)

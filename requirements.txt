@@ -1,0 +1,11 @@
+# Tested with Python 3.12 (3.11+ required by these pandas/numpy versions).
+numpy==2.4.4
+pandas==3.0.2
+scikit-learn==1.8.0
+imbalanced-learn==0.14.2
+joblib==1.5.3
+shap==0.53.0
+matplotlib==3.10.8
+plotly==7.1.0
+streamlit==1.65.0
+pytest==9.1.1

@@ -1,0 +1,8 @@
+{
+  "scenario": "post_call",
+  "method": "shap_tree",
+  "output_space": "log-odds",
+  "estimator": "HistGradientBoostingClassifier",
+  "n_explained": 2000,
+  "max_abs_additivity_error": 4.9960036108132044e-15
+}
