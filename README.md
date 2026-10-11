@@ -22,54 +22,6 @@ Runs fully locally: no paid APIs, no cloud accounts, no secrets.
 
 Separate models and artifacts are kept for each (`artifacts/pre_call/`, `artifacts/post_call/`).
 
-## Quick start on Windows (step by step)
-
-1. **Install Python 3.12** from https://www.python.org/downloads/ . Tick **"Add python.exe to PATH"** in the
-   installer. Python 3.11 or newer is required; 3.12 is what this project was tested with.
-2. **Open PowerShell** in the project folder (in File Explorer: open the folder, click the address bar, type
-   `powershell`, press Enter).
-3. **Create and activate a virtual environment:**
-   ```powershell
-   py -m venv venv
-   venv\Scripts\Activate.ps1
-   ```
-   If PowerShell says scripts are disabled, run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`
-   and activate again. In `cmd.exe` use `venv\Scripts\activate.bat`. You should see `(venv)` in the prompt.
-4. **Install the dependencies:**
-   ```powershell
-   python -m pip install --upgrade pip
-   pip install -r requirements.txt
-   ```
-5. **Run the app** (trained models are included in `artifacts/`, so no training is needed):
-   ```powershell
-   streamlit run app.py
-   ```
-   Your browser opens at http://localhost:8501 . Stop with `Ctrl+C`.
-
-macOS / Linux: replace step 3 with `python3 -m venv venv && source venv/bin/activate`.
-
-## Google Colab version
-
-`notebooks/BankSmart_AI_Colab.ipynb` is a self-contained notebook that reproduces the whole model: data validation,
-leakage-aware preprocessing, 8-model comparison, calibration, threshold selection, test evaluation with confidence
-intervals, SHAP, campaign lift, single/batch prediction and a time-ordered check. It does **not** need this repository
-or the trained files; it trains from the dataset.
-
-1. Push the project to GitHub (below), then open the notebook with the badge above, or go to
-   https://colab.research.google.com -> **GitHub** tab -> paste your repository URL -> choose the notebook.
-   Without GitHub: **File -> Upload notebook**.
-2. **Runtime -> Run all.** When the data cell asks, upload `bank-full.csv` / Kaggle `train.csv`.
-   (Or mount Google Drive and set `DATA_PATH` to the file's path.)
-3. Settings are in one cell: `SCENARIO` (`"pre_call"` or `"post_call"`), `FAST_MODE` (quicker, lighter run).
-   No GPU is needed; the free CPU runtime is enough.
-4. The last cells let you predict one customer, upload a CSV for batch prediction, and download the model and results.
-
-`BankSmart_AI_Colab_example_run.ipynb` is the same notebook with outputs, from a test run in a Linux environment (not Colab) so you can preview results on GitHub without running anything.
-
-Notes: if Colab shows a NumPy/pandas import error right after the first install cell, use **Runtime -> Restart session** and run again. A private GitHub repository can only be opened from Colab after you grant Colab access to your private repos.
-Colab's package versions differ from `requirements.txt`, so numbers may differ slightly from the app's (the notebook
-prints the versions it used). Models saved from Colab should be reloaded with the same scikit-learn version.
-
 ## Dataset
 
 Source: UCI Machine Learning Repository, *Bank Marketing* (dataset 222), CC BY 4.0.
