@@ -1,4 +1,4 @@
-# BankSmart AI
+# BankSmart AI- Bank Term Prediction model
 
 Predict which bank customers are likely to subscribe to a term deposit when contacted by phone, and explain why.
 An end-to-end machine-learning project: data validation, leakage-aware preprocessing, model comparison, probability
