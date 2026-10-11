@@ -150,16 +150,6 @@ data/raw/                   put bank_marketing.csv here (git-ignored)
   out-of-range values make a row invalid. Missing cells and unseen categories are scored but flagged.
 * **Honest explanations:** SHAP contributions describe model behaviour, not causes.
 
-## Upload to GitHub (step by step)
-
-**One-time setup**
-1. Create a free account at https://github.com/signup .
-2. Install Git for Windows from https://git-scm.com/download/win (accept the defaults), then **reopen PowerShell**.
-3. Tell Git who you are (use the same email as your GitHub account):
-   ```powershell
-   git config --global user.name "Your Name"
-   git config --global user.email "you@example.com"
-   ```
 
 **Create the repository**
 4. On GitHub click **+ -> New repository**. Name it (for example `banksmart-ai`), choose **Public** (needed for the
