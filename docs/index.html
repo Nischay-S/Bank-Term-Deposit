@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BankSmart AI: explainable term-deposit prediction</title>
+<meta name="description" content="An end-to-end, explainable machine-learning project that estimates which bank customers are likely to subscribe to a term deposit, with honest offline evaluation.">
+<style>
+:root{
+  --bg:#ffffff; --surface:#f4f7fa; --surface2:#e9eff5; --text:#0b2545; --muted:#52627a; --line:#d9e1ea;
+  --teal:#0e8f82; --teal-soft:#d3efeb; --blue:#2f6fde; --amber:#b87a0f; --amber-soft:#fbf1dc; --red:#c8452d;
+  --shadow:0 1px 2px rgba(11,37,69,.06),0 6px 20px rgba(11,37,69,.06);
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0a1626; --surface:#102236; --surface2:#17304a; --text:#e7eef7; --muted:#9db0c6; --line:#244058;
+    --teal:#34c9b6; --teal-soft:#123a3c; --blue:#7aa5ff; --amber:#f0b24c; --amber-soft:#3a2d12; --red:#ff8a70;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 20px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0a1626; --surface:#102236; --surface2:#17304a; --text:#e7eef7; --muted:#9db0c6; --line:#244058;
+  --teal:#34c9b6; --teal-soft:#123a3c; --blue:#7aa5ff; --amber:#f0b24c; --amber-soft:#3a2d12; --red:#ff8a70;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 20px rgba(0,0,0,.3);
+}
+html{scroll-padding-top:calc(72px + env(safe-area-inset-top,0px)); scroll-behavior:smooth}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--text);
+  font:16px/1.6 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  -webkit-font-smoothing:antialiased}
+a{color:var(--blue)} a:hover{text-decoration:none}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1100px;margin:0 auto;padding:0 clamp(16px,4vw,32px)}
+.num{font-variant-numeric:tabular-nums}
+/* nav */
+header.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:color-mix(in srgb,var(--bg) 92%,transparent);
+  backdrop-filter:saturate(1.4) blur(8px);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;gap:18px;height:56px}
+.brand{font-weight:750;letter-spacing:-.01em;color:var(--text);text-decoration:none;white-space:nowrap}
+.brand b{color:var(--teal)}
+.nav nav{display:flex;gap:4px;overflow-x:auto;flex:1;scrollbar-width:none}
+.nav nav::-webkit-scrollbar{display:none}
+.nav nav a{color:var(--muted);text-decoration:none;padding:6px 10px;border-radius:6px;font-size:.92rem;white-space:nowrap}
+.nav nav a:hover{background:var(--surface);color:var(--text)}
+button{font:inherit;color:inherit}
+.iconbtn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:.85rem}
+.iconbtn:hover{background:var(--surface2)}
+/* hero */
+.hero{padding:clamp(36px,8vw,84px) 0 28px}
+.hero h1{font-size:clamp(2rem,5.4vw,3.4rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 16px;max-width:18ch}
+.hero h1 em{font-style:normal;color:var(--teal)}
+.lede{font-size:clamp(1.02rem,2vw,1.2rem);color:var(--muted);max-width:60ch;margin:0 0 24px}
+.cta{display:flex;flex-wrap:wrap;gap:10px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:9px;border:1px solid var(--line);
+  background:var(--surface);color:var(--text);text-decoration:none;font-weight:600;cursor:pointer}
+.btn:hover{background:var(--surface2)}
+.btn.primary{background:var(--teal);border-color:var(--teal);color:#fff}
+:root[data-theme="dark"] .btn.primary{color:#04201d}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn.primary{color:#04201d}}
+.btn.primary:hover{filter:brightness(1.08)}
+/* sections */
+section{padding:clamp(34px,6vw,64px) 0;border-top:1px solid var(--line)}
+section h2{font-size:clamp(1.5rem,3.2vw,2.1rem);letter-spacing:-.02em;line-height:1.15;margin:0 0 8px}
+section .sub{color:var(--muted);max-width:68ch;margin:0 0 26px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 20px;box-shadow:var(--shadow)}
+.card h3{margin:0 0 6px;font-size:1rem}
+.card p{margin:0;color:var(--muted);font-size:.95rem}
+.stat .k{color:var(--muted);font-size:.85rem}
+.stat .v{font-size:2rem;font-weight:720;letter-spacing:-.02em;line-height:1.15}
+.stat .ci{color:var(--muted);font-size:.8rem}
+.note{border-left:3px solid var(--teal);background:var(--teal-soft);padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0;max-width:80ch}
+.warn{border-left-color:var(--amber);background:var(--amber-soft)}
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:3px;gap:3px;margin:0 0 18px}
+.seg button{border:0;background:transparent;padding:8px 16px;border-radius:7px;cursor:pointer;font-weight:600;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--bg);color:var(--text);box-shadow:var(--shadow)}
+.two{display:grid;gap:22px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));align-items:start}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+.panel h3{margin:0 0 4px;font-size:1.05rem}
+.panel .cap{color:var(--muted);font-size:.88rem;margin:0 0 12px}
+svg{display:block;width:100%;height:auto}
+.axis{stroke:var(--line)} .tick{fill:var(--muted);font-size:11px}
+.l-teal{stroke:var(--teal)} .l-blue{stroke:var(--blue)} .l-amber{stroke:var(--amber)} .l-grey{stroke:var(--muted)} .l-ink{stroke:var(--text)}
+.f-teal{fill:var(--teal)} .f-blue{fill:var(--blue)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.85rem;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:12px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
+input[type=range]{width:100%;accent-color:var(--teal)}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin:12px 0}
+.readout div{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.readout b{display:block;font-size:1.15rem;letter-spacing:-.01em}
+.readout span{color:var(--muted);font-size:.78rem}
+.cm{display:grid;grid-template-columns:auto 1fr 1fr;gap:6px;font-size:.9rem;align-items:stretch}
+.cm .h{color:var(--muted);font-size:.78rem;display:flex;align-items:center;justify-content:center;text-align:center}
+.cm .c{border-radius:8px;padding:12px 8px;text-align:center;background:var(--bg);border:1px solid var(--line)}
+.cm .c b{display:block;font-size:1.25rem}
+.cm .good{background:var(--teal-soft)} .cm .bad{background:var(--amber-soft)}
+.bars{display:grid;gap:8px}
+.bar{display:grid;grid-template-columns:minmax(120px,38%) 1fr 54px;gap:10px;align-items:center;font-size:.9rem}
+.bar .t{height:14px;background:var(--surface2);border-radius:7px;overflow:hidden}
+.bar .t i{display:block;height:100%;background:var(--blue);border-radius:7px}
+.bar.sel .t i{background:var(--teal)} .bar.sel .n{font-weight:700}
+.bar .v{text-align:right}
+.mbars{display:flex;align-items:flex-end;gap:6px;height:170px;position:relative;padding-top:8px}
+.mbars .m{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;font-size:.7rem;color:var(--muted)}
+.mbars .m i{display:block;width:100%;background:var(--teal);border-radius:4px 4px 0 0;min-height:2px}
+.mbars .ref{position:absolute;left:0;right:0;border-top:2px dashed var(--muted);opacity:.7}
+.steps{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));counter-reset:s;padding:0;list-style:none;margin:0}
+.steps li{counter-increment:s;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px 14px 52px;position:relative}
+.steps li::before{content:counter(s);position:absolute;left:14px;top:14px;width:26px;height:26px;border-radius:50%;
+  background:var(--teal);color:#fff;font-weight:700;display:grid;place-items:center;font-size:.85rem}
+:root[data-theme="dark"] .steps li::before{color:#04201d}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .steps li::before{color:#04201d}}
+.steps b{display:block}.steps span{color:var(--muted);font-size:.9rem}
+.big{display:grid;gap:14px;grid-template-columns:1fr auto 1fr;align-items:center;text-align:center;margin:8px 0 14px}
+.big .v{font-size:clamp(2rem,6vw,3rem);font-weight:760;letter-spacing:-.03em}
+.big .arrow{font-size:1.6rem;color:var(--amber)}
+.big small{display:block;color:var(--muted)}
+pre{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:.88rem;line-height:1.55;margin:0}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--muted);font-weight:600;font-size:.8rem}
+td.r,th.r{text-align:right}
+ul.clean{margin:0;padding-left:1.1em;max-width:78ch} ul.clean li{margin:6px 0}
+footer{border-top:1px solid var(--line);padding:30px 0 40px;color:var(--muted);font-size:.9rem}
+footer a{color:inherit}
+@media (max-width:620px){.big{grid-template-columns:1fr}.big .arrow{transform:rotate(90deg)}.bar{grid-template-columns:minmax(96px,34%) 1fr 48px}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<header class="nav"><div class="wrap">
+  <a class="brand" href="#top">BankSmart <b>AI</b></a>
+  <nav aria-label="Sections">
+    <a href="#results">Results</a><a href="#explore">Explore</a><a href="#models">Models</a><a href="#why">Why</a>
+    <a href="#honest">Honest limits</a><a href="#method">Method</a><a href="#run">Run it</a>
+  </nav>
+  <button class="iconbtn" id="theme" type="button" aria-label="Toggle light or dark theme">Theme</button>
+</div></header>
+
+<main id="top">
+<div class="wrap hero">
+  <h1>Which customers will say <em>yes</em> to a term deposit, and why?</h1>
+  <p class="lede">BankSmart AI ranks bank customers by their estimated chance of subscribing, explains each estimate, and is open about what the numbers
+  do and do not show. It is an end-to-end project: validated data, leakage controls, model comparison, calibration, SHAP explanations and a tested dashboard.</p>
+  <div class="cta">
+    <a class="btn primary" id="lnk-repo" href="#">View the code on GitHub</a>
+    <a class="btn" id="lnk-colab" href="#">Open in Google Colab</a>
+    <a class="btn" href="predict.html">Try the predictor</a>
+    <a class="btn" href="#run">Run the dashboard</a>
+  </div>
+</div>
+
+<section id="results" style="border-top:0;padding-top:8px"><div class="wrap">
+  <h2>Results</h2>
+  <p class="sub">Measured once on a held-out test set of <span class="num" id="ntest"></span> customers, after every model choice was made on separate validation data.</p>
+  <div class="seg" role="group" aria-label="Scenario">
+    <button type="button" id="sc-pre" aria-pressed="true">Pre-call</button>
+    <button type="button" id="sc-post" aria-pressed="false">Post-call</button>
+  </div>
+  <div id="sc-note" class="note"></div>
+  <div class="grid" id="stats"></div>
+  <div class="two" style="margin-top:18px">
+    <div class="panel">
+      <h3>What the model gets right and wrong</h3>
+      <p class="cap" id="cm-cap"></p>
+      <div class="cm" id="cm" role="img" aria-label="Confusion matrix"></div>
+    </div>
+    <div class="panel">
+      <h3>In plain words</h3>
+      <p id="plain" style="margin:0"></p>
+      <p class="cap" style="margin-top:12px">Accuracy alone would mislead here: predicting &ldquo;no&rdquo; for everyone is <b class="num" id="always-no"></b> accurate and finds nobody.</p>
+    </div>
+  </div>
+</div></section>
+
+<section id="explore"><div class="wrap">
+  <h2>Explore the trade-offs</h2>
+  <p class="sub">Two decisions shape how useful a model is: how high to set the bar for &ldquo;likely subscriber&rdquo;, and how many customers to contact. Move the sliders. Both views use the held-out test set.</p>
+  <div class="two">
+    <div class="panel">
+      <h3>Decision threshold</h3>
+      <p class="cap">Lower the bar and you find more subscribers but make more wasted calls. The validation-chosen threshold is marked.</p>
+      <div id="sweep"></div>
+      <div class="legend"><span><i style="background:var(--blue)"></i>precision</span><span><i style="background:var(--teal)"></i>recall</span><span><i style="background:var(--amber)"></i>F1</span></div>
+      <label for="thr" style="display:block;margin-top:12px;font-weight:600">Threshold: <span class="num" id="thr-val"></span></label>
+      <input type="range" id="thr" min="0.02" max="0.98" step="0.01" value="0.11">
+      <div class="readout" id="thr-read"></div>
+      <button type="button" class="iconbtn" id="thr-reset">Reset to the validation-chosen threshold</button>
+    </div>
+    <div class="panel">
+      <h3>Campaign prioritisation (offline)</h3>
+      <p class="cap">Rank customers by predicted probability and contact the top share.</p>
+      <div id="gains"></div>
+      <div class="legend"><span><i style="background:var(--teal)"></i>model ranking</span><span><i style="background:var(--muted)"></i>random selection</span></div>
+      <label for="q" style="display:block;margin-top:12px;font-weight:600">Contact the top <span class="num" id="q-val"></span> of customers</label>
+      <input type="range" id="q" min="1" max="100" step="1" value="20">
+      <div class="readout" id="q-read"></div>
+      <div class="note warn" style="margin:10px 0 0"><b>Offline only.</b> This shows how well the model ranked past customers. It does not show that contacting them would cause extra subscriptions, and no revenue or ROI claim can be made without cost data and a controlled experiment.</div>
+    </div>
+  </div>
+  <div class="tablewrap panel" style="margin-top:18px"><h3>Top 10%, 20% and 30%</h3>
+    <table><thead><tr><th>Outreach</th><th class="r">Customers</th><th class="r">Subscribers found</th><th class="r">Precision</th><th class="r">Recall</th><th class="r">Lift</th></tr></thead><tbody id="camp-body"></tbody></table>
+  </div>
+</div></section>
+
+<section id="models"><div class="wrap">
+  <h2>Eight models, compared fairly</h2>
+  <p class="sub">All models used the same split. The winner was chosen on validation PR-AUC only; the test set was never used to choose.</p>
+  <div class="two">
+    <div class="panel"><h3>Validation PR-AUC</h3><p class="cap">Higher is better. Bars start at zero, so the small gaps between the top models are visible as they really are.</p><div class="bars" id="model-bars"></div></div>
+    <div class="panel"><h3>How to read this</h3>
+      <ul class="clean">
+        <li id="model-note"></li>
+        <li>Class weights and SMOTE (applied only inside training folds) mostly moved the default 0.5 cut-off rather than improving ranking quality; a tuned threshold can do the same.</li>
+        <li>Probabilities were checked for calibration, so &ldquo;20%&rdquo; means roughly 20% of such customers subscribe.</li>
+      </ul>
+    </div>
+  </div>
+</div></section>
+
+<section id="why"><div class="wrap">
+  <h2>Why did the model say that?</h2>
+  <p class="sub">SHAP shows how much each input moved the model&rsquo;s score, averaged over customers. Categories such as month or contact channel are added back together.</p>
+  <div class="two">
+    <div class="panel"><h3>Average influence on predictions</h3><div class="bars" id="shap-bars"></div></div>
+    <div class="panel"><h3>Association, not causation</h3>
+      <p style="margin:0 0 10px">An explanation describes how the <em>model</em> used an input, based on patterns in historical data. It does not show that changing a customer&rsquo;s attribute would change their decision.</p>
+      <p style="margin:0;color:var(--muted)">Month and contact channel rank high. That may reflect how campaigns were run (in waves, with some contact methods unrecorded) rather than customer traits, so treat them as clues about the data, not levers for customers.</p>
+    </div>
+  </div>
+</div></section>
+
+<section id="honest"><div class="wrap">
+  <h2>What these numbers do not tell you</h2>
+  <p class="sub">This project reports its limits openly, because they change how the results should be read.</p>
+  <div class="panel">
+    <h3>Random split versus time order</h3>
+    <p class="cap">The dataset is ordered by date. The main evaluation uses a random split, which lets the model learn from later periods. Training on the earliest 60% and testing on the latest 20% gives a harsher, more realistic picture.</p>
+    <div class="big">
+      <div><div class="v num" id="t-random"></div><small>test ROC-AUC, random split</small></div>
+      <div class="arrow" aria-hidden="true">&rarr;</div>
+      <div><div class="v num" id="t-time" style="color:var(--amber)"></div><small>test ROC-AUC, time-ordered</small></div>
+    </div>
+    <p class="cap" style="margin:0" id="t-note"></p>
+    <h3 style="margin-top:18px">Subscription rate by month</h3>
+    <div class="mbars" id="months" role="img" aria-label="Subscription rate by month"></div>
+  </div>
+  <div class="two" style="margin-top:18px">
+    <div class="panel"><h3>Known limitations</h3>
+      <ul class="clean">
+        <li>Offline evaluation on one bank&rsquo;s 2008 to 2010 campaigns.</li>
+        <li>No cost or revenue data: the recall-favouring threshold is an assumption.</li>
+        <li>No fairness audit yet; age and marital status are inputs.</li>
+        <li>Pre-call excludes call duration, which is only known after the call; the post-call model is for analysis only.</li>
+      </ul></div>
+    <div class="panel"><h3>Checks that were run</h3>
+      <ul class="clean">
+        <li>The supplied <code>test.csv</code> was found to be entirely contained in the training file, so it was not used.</li>
+        <li>A test fails if call duration leaks into the pre-call model.</li>
+        <li id="tests-li">Automated tests cover data, preprocessing, training, prediction, explanations and every app page.</li>
+        <li>Retraining reproduced the same results exactly (fixed seed).</li>
+      </ul></div>
+  </div>
+</div></section>
+
+<section id="method"><div class="wrap">
+  <h2>How it works</h2>
+  <p class="sub">Each step is a separate, tested module, and training is kept apart from the app.</p>
+  <ol class="steps">
+    <li><b>Validate</b><span>Check columns, types, categories and the target before anything else.</span></li>
+    <li><b>Control leakage</b><span>Two scenarios; call duration is removed by the pre-call pipeline itself.</span></li>
+    <li><b>Split</b><span>Stratified 60/20/20 with a fixed seed, so the class balance is preserved.</span></li>
+    <li><b>Compare</b><span>Cross-validate eight models, including class-weighted and SMOTE variants.</span></li>
+    <li><b>Select on validation</b><span>Choose model, calibration and threshold without touching the test set.</span></li>
+    <li><b>Test once</b><span>Score the held-out set with bootstrap confidence intervals.</span></li>
+    <li><b>Explain</b><span>SHAP with documented fallbacks and plain-language wording.</span></li>
+    <li><b>Serve</b><span>A seven-page Streamlit dashboard with strict input checks.</span></li>
+  </ol>
+</div></section>
+
+<section id="run"><div class="wrap">
+  <h2>Run it yourself</h2>
+  <p class="sub">The trained models are in the repository, so the dashboard runs without the dataset. Python 3.11 or newer is required (3.12 was used).</p>
+  <div class="two">
+    <div class="panel"><h3>Windows (PowerShell)</h3>
+<pre><code id="cmd-win">git clone https://github.com/Nischay-S/Bank-Term-Deposit.git
+cd Bank-Term-Deposit
+py -m venv venv
+venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+streamlit run app.py</code></pre>
+      <div style="margin-top:10px"><button type="button" class="iconbtn" data-copy="cmd-win">Copy commands</button></div></div>
+    <div class="panel"><h3>macOS or Linux</h3>
+<pre><code id="cmd-nix">git clone https://github.com/Nischay-S/Bank-Term-Deposit.git
+cd Bank-Term-Deposit
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+streamlit run app.py</code></pre>
+      <div style="margin-top:10px"><button type="button" class="iconbtn" data-copy="cmd-nix">Copy commands</button></div></div>
+  </div>
+  <p class="sub" style="margin-top:18px">Prefer no installation? Open the <a id="lnk-colab2" href="#">Colab notebook</a>, upload the dataset when asked, and run all cells.</p>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+  <p style="margin:0 0 6px"><b style="color:var(--text)">BankSmart AI</b> by Nischay Singh. B.Tech, Computer and Communication Engineering, Manipal University Jaipur.</p>
+  <p style="margin:0 0 6px">Data: UCI Machine Learning Repository, <i>Bank Marketing</i> (Moro, Rita &amp; Cortez, 2014),
+  <a id="lnk-data" href="#">doi:10.24432/C5K306</a>, CC BY 4.0. All figures on this page are generated from the project&rsquo;s saved results.</p>
+  <p style="margin:0"><a id="lnk-repo2" href="#">Source code</a></p>
+</div></footer>
+
+<script id="data" type="application/json">{"repo":"https://github.com/Nischay-S/Bank-Term-Deposit","colab":"https://colab.research.google.com/github/Nischay-S/Bank-Term-Deposit/blob/main/notebooks/BankSmart_AI_Colab.ipynb","dataset_url":"https://doi.org/10.24432/C5K306","n_tests":116,"dataset":{"n_rows":45211,"n_pos":5289,"prevalence":0.11698480458295547,"months":[{"category":"jan","n":1403,"rate":0.10121168923734854},{"category":"feb","n":2649,"rate":0.1664779161947905},{"category":"mar","n":477,"rate":0.519916142557652},{"category":"apr","n":2932,"rate":0.19679399727148705},{"category":"may","n":13766,"rate":0.06719453726572715},{"category":"jun","n":5341,"rate":0.10222804718217562},{"category":"jul","n":6895,"rate":0.09093546047860769},{"category":"aug","n":6247,"rate":0.11013286377461182},{"category":"sep","n":579,"rate":0.46459412780656306},{"category":"oct","n":738,"rate":0.43766937669376693},{"category":"nov","n":3970,"rate":0.10151133501259446},{"category":"dec","n":214,"rate":0.4672897196261682}]},"scenarios":{"pre_call":{"model_note":"The best two models differ by 0.007 validation PR-AUC, within the fold-to-fold spread (0.013); the third is 0.023 behind. Treat the order among the leaders as tentative.","model":"hist_gradient_boosting","calibration":"none","threshold":0.1126118827022342,"metrics":{"pr_auc":0.4553371020145393,"roc_auc":0.8009465408321133,"precision":0.324964471814306,"recall":0.6483931947069943,"f1":0.43294414641842854,"accuracy":0.8012827601459692,"balanced_accuracy":0.7349667914674609,"tp":686,"fp":1425,"fn":372,"tn":6560,"n_predicted_positive":2111,"prevalence":0.11699657193409267},"ci":{"pr_auc":[0.42374461425679205,0.48871705043621055],"roc_auc":[0.7854990031245257,0.8163385439003447],"precision":[0.30502763134630073,0.34471856415136315],"recall":[0.6191387559808612,0.6766330750584484]},"n_test":9043,"n_pos":1058,"models_val":[{"model":"hist_gradient_boosting","pr_auc":0.480926222771318,"roc_auc":0.8038340977796803},{"model":"hist_gradient_boosting_tuned","pr_auc":0.4734990393034973,"roc_auc":0.8033268214122006},{"model":"random_forest_balanced","pr_auc":0.4574396636056596,"roc_auc":0.7993035930083229},{"model":"random_forest_tuned","pr_auc":0.4573053182668293,"roc_auc":0.8012416610157934},{"model":"logreg_baseline","pr_auc":0.4135042857077024,"roc_auc":0.7700753586568222},{"model":"logreg_smote","pr_auc":0.4099087985417308,"roc_auc":0.7678116156699031},{"model":"logreg_balanced","pr_auc":0.4093008095976132,"roc_auc":0.7707752461444628},{"model":"decision_tree_balanced","pr_auc":0.3557311321073675,"roc_auc":0.7561250217826957}],"sweep":[{"t":0.02,"p":0.1187795541544697,"r":0.997164461247637,"f1":0.2122736418511066,"n":8882},{"t":0.03,"p":0.1273940442357592,"r":0.9744801512287334,"f1":0.2253305649655775,"n":8093},{"t":0.04,"p":0.1446347533304055,"r":0.9338374291115312,"f1":0.2504753454176702,"n":6831},{"t":0.05,"p":0.165323992994746,"r":0.8922495274102079,"f1":0.2789598108747045,"n":5710},{"t":0.06,"p":0.1878813381022512,"r":0.8440453686200378,"f1":0.3073481328514885,"n":4753},{"t":0.07,"p":0.2143038295713923,"r":0.7986767485822306,"f1":0.3379324135172965,"n":3943},{"t":0.08,"p":0.2418106015485408,"r":0.7674858223062382,"f1":0.3677536231884058,"n":3358},{"t":0.09,"p":0.2685121107266436,"r":0.7334593572778828,"f1":0.3931104356636271,"n":2890},{"t":0.1,"p":0.2936444086886565,"r":0.6899810964083176,"f1":0.4119638826185101,"n":2486},{"t":0.11,"p":0.3186813186813186,"r":0.6578449905482041,"f1":0.4293645897594078,"n":2184},{"t":0.12,"p":0.3411405295315682,"r":0.6332703213610587,"f1":0.443414956982131,"n":1964},{"t":0.13,"p":0.3665360940123111,"r":0.6190926275992439,"f1":0.4604569420035149,"n":1787},{"t":0.14,"p":0.3914110429447853,"r":0.6030245746691871,"f1":0.4747023809523809,"n":1630},{"t":0.15,"p":0.4082568807339449,"r":0.5888468809073724,"f1":0.4821981424148607,"n":1526},{"t":0.16,"p":0.4253990284524636,"r":0.5793950850661626,"f1":0.4905962384953982,"n":1441},{"t":0.17,"p":0.4340579710144927,"r":0.5661625708884688,"f1":0.4913863822805578,"n":1380},{"t":0.18,"p":0.4464692482915717,"r":0.555765595463138,"f1":0.4951578947368421,"n":1317},{"t":0.19,"p":0.4549082202713487,"r":0.5387523629489603,"f1":0.4932929467762873,"n":1253},{"t":0.2,"p":0.468102734051367,"r":0.5340264650283554,"f1":0.4988962472406181,"n":1207},{"t":0.21,"p":0.4708904109589041,"r":0.5198487712665406,"f1":0.4941599281221923,"n":1168},{"t":0.22,"p":0.4777183600713012,"r":0.5066162570888468,"f1":0.4917431192660551,"n":1122},{"t":0.23,"p":0.4821264894592117,"r":0.497164461247637,"f1":0.4895300139599814,"n":1091},{"t":0.24,"p":0.4869158878504673,"r":0.4924385633270321,"f1":0.4896616541353383,"n":1070},{"t":0.25,"p":0.4899521531100478,"r":0.4839319470699433,"f1":0.4869234427009035,"n":1045},{"t":0.26,"p":0.5,"r":0.4810964083175803,"f1":0.4903660886319846,"n":1018},{"t":0.27,"p":0.5060606060606061,"r":0.4735349716446125,"f1":0.4892578125,"n":990},{"t":0.28,"p":0.514018691588785,"r":0.4678638941398866,"f1":0.4898565066798614,"n":963},{"t":0.29,"p":0.5208110992529349,"r":0.4612476370510397,"f1":0.4892230576441103,"n":937},{"t":0.3,"p":0.523756906077348,"r":0.4480151228733459,"f1":0.4829342842587876,"n":905},{"t":0.31,"p":0.5273972602739726,"r":0.4366729678638941,"f1":0.4777662874870734,"n":876},{"t":0.32,"p":0.535924617196702,"r":0.4300567107750472,"f1":0.4771893025694808,"n":849},{"t":0.33,"p":0.53836784409257,"r":0.4177693761814744,"f1":0.4704630122405535,"n":821},{"t":0.34,"p":0.5445420326223338,"r":0.4102079395085066,"f1":0.4679245283018868,"n":797},{"t":0.35,"p":0.5486381322957199,"r":0.3998109640831758,"f1":0.4625478403499179,"n":771},{"t":0.36,"p":0.5525606469002695,"r":0.387523629489603,"f1":0.4555555555555555,"n":742},{"t":0.37,"p":0.5555555555555556,"r":0.3780718336483932,"f1":0.4499437570303712,"n":720},{"t":0.38,"p":0.564327485380117,"r":0.3648393194706994,"f1":0.4431687715269805,"n":684},{"t":0.39,"p":0.5642201834862385,"r":0.3487712665406427,"f1":0.4310747663551402,"n":654},{"t":0.4,"p":0.565008025682183,"r":0.332703213610586,"f1":0.4187983343248067,"n":623},{"t":0.41,"p":0.565365025466893,"r":0.3147448015122873,"f1":0.4043715846994535,"n":589},{"t":0.42,"p":0.5656742556917689,"r":0.3052930056710775,"f1":0.3965623081645181,"n":571},{"t":0.43,"p":0.5779816513761468,"r":0.2977315689981096,"f1":0.3930131004366812,"n":545},{"t":0.44,"p":0.5846153846153846,"r":0.2873345935727788,"f1":0.385297845373891,"n":520},{"t":0.45,"p":0.5967741935483871,"r":0.2797731568998109,"f1":0.3809523809523809,"n":496},{"t":0.46,"p":0.6016949152542372,"r":0.2684310018903592,"f1":0.3712418300653595,"n":472},{"t":0.47,"p":0.6106194690265486,"r":0.2608695652173913,"f1":0.3655629139072848,"n":452},{"t":0.48,"p":0.6064814814814815,"r":0.2476370510396975,"f1":0.3516778523489933,"n":432},{"t":0.49,"p":0.6159420289855072,"r":0.2410207939508506,"f1":0.3464673913043478,"n":414},{"t":0.5,"p":0.6155778894472361,"r":0.2315689981096408,"f1":0.3365384615384615,"n":398},{"t":0.51,"p":0.6226912928759895,"r":0.2230623818525519,"f1":0.3284620737647877,"n":379},{"t":0.52,"p":0.6336088154269972,"r":0.217391304347826,"f1":0.3237156931738212,"n":363},{"t":0.53,"p":0.6371428571428571,"r":0.2107750472589792,"f1":0.3167613636363636,"n":350},{"t":0.54,"p":0.6516516516516516,"r":0.2051039697542533,"f1":0.3120057512580877,"n":333},{"t":0.55,"p":0.665625,"r":0.2013232514177693,"f1":0.309143686502177,"n":320},{"t":0.56,"p":0.6765676567656765,"r":0.1937618147448015,"f1":0.3012490815576781,"n":303},{"t":0.57,"p":0.6805555555555556,"r":0.1852551984877126,"f1":0.2912332838038633,"n":288},{"t":0.58,"p":0.6836363636363636,"r":0.1776937618147448,"f1":0.2820705176294073,"n":275},{"t":0.59,"p":0.685823754789272,"r":0.1691871455576559,"f1":0.2714177407126611,"n":261},{"t":0.6,"p":0.6907630522088354,"r":0.162570888468809,"f1":0.2631981637337414,"n":249},{"t":0.61,"p":0.70042194092827,"r":0.1568998109640831,"f1":0.2563706563706563,"n":237},{"t":0.62,"p":0.7207207207207207,"r":0.1512287334593572,"f1":0.25,"n":222},{"t":0.63,"p":0.7255813953488373,"r":0.1474480151228733,"f1":0.2450903377847604,"n":215},{"t":0.64,"p":0.745,"r":0.1408317580340264,"f1":0.2368839427662957,"n":200},{"t":0.65,"p":0.7382198952879581,"r":0.1332703213610586,"f1":0.2257806244995996,"n":191},{"t":0.66,"p":0.7311827956989247,"r":0.1285444234404537,"f1":0.2186495176848874,"n":186},{"t":0.67,"p":0.7314285714285714,"r":0.1209829867674858,"f1":0.2076236820762368,"n":175},{"t":0.68,"p":0.7300613496932515,"r":0.1124763705103969,"f1":0.1949221949221949,"n":163},{"t":0.69,"p":0.7402597402597403,"r":0.107750472589792,"f1":0.1881188118811881,"n":154},{"t":0.7,"p":0.75,"r":0.0992438563327032,"f1":0.1752921535893155,"n":140},{"t":0.71,"p":0.7244094488188977,"r":0.0869565217391304,"f1":0.1552742616033755,"n":127},{"t":0.72,"p":0.7181818181818181,"r":0.0746691871455576,"f1":0.1352739726027397,"n":110},{"t":0.73,"p":0.7216494845360825,"r":0.0661625708884688,"f1":0.1212121212121212,"n":97},{"t":0.74,"p":0.7191011235955056,"r":0.0604914933837429,"f1":0.1115954664341761,"n":89},{"t":0.75,"p":0.7721518987341772,"r":0.0576559546313799,"f1":0.1072999120492524,"n":79},{"t":0.76,"p":0.7971014492753623,"r":0.051984877126654,"f1":0.0976042590949423,"n":69},{"t":0.77,"p":0.8275862068965517,"r":0.0453686200378071,"f1":0.086021505376344,"n":58},{"t":0.78,"p":0.84,"r":0.0396975425330812,"f1":0.075812274368231,"n":50},{"t":0.79,"p":0.8333333333333334,"r":0.0330812854442344,"f1":0.0636363636363636,"n":42},{"t":0.8,"p":0.8108108108108109,"r":0.0283553875236294,"f1":0.0547945205479452,"n":37},{"t":0.81,"p":0.7741935483870968,"r":0.0226843100189035,"f1":0.0440771349862259,"n":31},{"t":0.82,"p":0.7894736842105263,"r":0.0141776937618147,"f1":0.0278551532033426,"n":19},{"t":0.83,"p":0.9166666666666666,"r":0.0103969754253308,"f1":0.0205607476635514,"n":12},{"t":0.84,"p":0.9090909090909092,"r":0.0094517958412098,"f1":0.0187090739008419,"n":11},{"t":0.85,"p":0.8888888888888888,"r":0.0075614366729678,"f1":0.0149953139643861,"n":9},{"t":0.86,"p":1.0,"r":0.0075614366729678,"f1":0.0150093808630394,"n":8},{"t":0.87,"p":1.0,"r":0.0037807183364839,"f1":0.007532956685499,"n":4},{"t":0.88,"p":1.0,"r":0.0018903591682419,"f1":0.0037735849056603,"n":2},{"t":0.89,"p":1.0,"r":0.0009451795841209,"f1":0.0018885741265344,"n":1},{"t":0.9,"p":1.0,"r":0.0009451795841209,"f1":0.0018885741265344,"n":1},{"t":0.91,"p":0.0,"r":0.0,"f1":0.0,"n":0},{"t":0.92,"p":0.0,"r":0.0,"f1":0.0,"n":0},{"t":0.93,"p":0.0,"r":0.0,"f1":0.0,"n":0},{"t":0.94,"p":0.0,"r":0.0,"f1":0.0,"n":0},{"t":0.95,"p":0.0,"r":0.0,"f1":0.0,"n":0},{"t":0.96,"p":0.0,"r":0.0,"f1":0.0,"n":0},{"t":0.97,"p":0.0,"r":0.0,"f1":0.0,"n":0},{"t":0.98,"p":0.0,"r":0.0,"f1":0.0,"n":0}],"ranking":"1111111101110110011011110110111111111111111111110111010111110111001100111101100001101000010111110110110101110111110101101111101111111111111100111011110101101100101110001111111100101111111111111111101110000111011000101010111011010001000100010101110101001011001110110111011101011011010110011100011101110100001100101011100100100001010100011000000111001010100110101010100001111010000010101001110000101111111100101001010010010111001010001101110111110011100101111000010000100110001111101001011000100011001001100001000101110000100111100110011000100100010100000100001110001100000111010010100110011111101000010101111011110010001010100010110110011111110001000101110010001111000110110101111001111000001001001010111100000000110010110001010011100010001111010110001000100011001100101110011000110110001000111100010111010010010000000010010110100000010011100110111001000010000010010000101100000010111010100000101010100010110011000001111110011101010000000100000110000001001101000000100000010000000011100010001001000000000110000101001100000010000000010100000000000000100010010100011101010010010001010000000010000010000000100110100100011100010010010110010000110010000000000101100011001000011100010011010010101100111000001000000000000010000000000000000000001000000001100010001000000001101000000011000000100010100100011010000100110101000000000000110001000000000100000000100000001000000001000010001100010000110010000000010101010000000110010110000000010100000000000100001010000000000010000000000000000000000001000000010000000000000000010001001010000001010000000100000010000000000000000000011000000000000010100000000010000100000000100001000000010000010100000001000000000000000001101000000000100000000010010010000000100000100010000000011000000000000010000000000000000000000000000000000010000000000000101000000000000000000100000000000001000000010000000100000000001001010100000000001000000000000000000000000000000000000000000000001000100000010000000001000010000100000000000000000000000000000001000100000100010000100000000000000000000100000000001000000100000000000000001000000000001001000000000010000000000100000000000000000100001000000100000000001000000000000010010000001100001000000000000000000000000100010011000010100001000000100000000000000000000000100000000000000100010000000010010000000000000000000000100000000001010010000001000110100000000000100100010000000100001010000000010000000000010000000000000000001000000001000000000000000000001001000000000000000000000000010000000000000000000000100000100000000001010001000000010000000000000000000000101000001000000000000001001001000000000000100010000000010000010000000000000000000000000000100000000000000100000000100010000000000000000000000001000000010010100000000000001000000000001000000000011001000000000001000000001100000000000001000000001000000000000000000000000100000001000001000010000100000010000100000000001001000010000010100000000010000000000000100000000011000000000000000000000000000000000000000000000000010000000010000010000000000000000000000000100000000000000101000000000000001000000000000000100000100000000000100011000001100000100000000000000000000000001000000000000000001001000000000000000000000000000000000011000100000000000000000000000000100000100000100000000000000100000001000000000000000000000000000100000000001001100000000000000000000000000000000100000000000000010000000001000000000000000000100001000001000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000010000000000010000000000000000000000000000000000000000000000000000000000000010100000001000000000000001000000000000000000000000000100000000000000100000000000000000010001000010000000000000001100010000000000100000000010000001001000000000000010000000000100000000000100000000000000010000000000000000001100000000000000000000000010000000001000000000000000000000100000000000000000000000000001000000000000000000000000000000000000000001000000010000000000000001000000000000000000000000010000000000000000000000000000100100100000000000000000000000000100000000000000000000000001000000010000001010010000000000000000000100000000100000000000000000000010010000000000000000000000000000000000000000000000000010000000000000000000000000000000010000000000000000010000000000000000000000000100000010000000000000000000010100000000000000001000000000000001010000001000000000000000001000000000000010000000010000000000010100100000000000000001000000000010000000000000000000000000000000000000000010010000000000000000000000000000000000000100000000000000100000000000000000000001000000000000000000001000000001000000010000000000000000000000000000000000000000000000000001000000000000000000000100000000000000000000011000000000000100000000000000000000000010000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001100000000000000000000000000000000000000010000000000000001000000000000000000000000000000010100000000101100000000000000000000000000011010000000000000000000000000000000010000000000100000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000010000000000000000000000010000000000000000010000100000100000000000000000000000000000000000000000000100000000000000000000000000000000100000000010000001000000000100001100001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000001000000000000000000000000000000000000101000000000000101000000000000000000000000000000000011000000000010001000000001000000000000000000000000000000000000000000010000000000100000000000101100000101000000000001000000011000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000100000000001000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000010100000100000000000000000001000000000000001000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000100000000000000000000000000000000000000000000000000000000000100000000000100010000000000000000000000000000000000000000000000010000000000010000000000000000000000000000000100000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000100000000001000000000000000000000011000000001000000000000010000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000010000000000000000000000000100000000100000000000010000000000000000000000000000000000000010010000000100000000000000000100000000000000000010000000100000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000100000000100000000001000100000010000000000000000000000000000000000000001000010000000000100000000000000000000000000000000000000000000000000000000000000000000100000000000001000000001000000000000000000000000010001000000000100000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000010000001000000010000000000000000000010000000000000000000000000100100000000000000000000000000001000000000000000000000000000000000000000000000000100000000000000000000000000000001000000000000000000000000000000000000000000000000000100000010000100000000000000000000000000100000000000000000000000000000000000000000000010000100000000001000000000000000000000000000000000000000000010000000000000000010000000000010000000000000000000000100000000000000000000000000000000000000000000000000000000000000100000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000010000100000000000000000000000000000000000000000000000000000010000000010000100000000010000000000000000000000000000000000000000000000000010000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000001000000000000100000000000000100000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000100000000000000000000000000000000000000000000000010000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000010000000000000000000000000000000100000000000001000000000000000000100000001000000000000100000000000000000000000010000000000000000000000000000000000000000000000010000000000000000000000000100000000000000000000100000000100000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000001000000000000000000000000000000000100000000000000000000000000000000000000000100001000000001000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000100000000001100000000000000000000000000000000000000000000000000000000000000000000000000000000000","campaign":[{"q":0.1,"k":905,"found":474,"precision":0.523756906077348,"recall":0.4480151228733459,"lift":4.4766859183907926},{"q":0.2,"k":1809,"found":656,"precision":0.3626312880044223,"recall":0.6200378071833649,"lift":3.0995035325368536},{"q":0.3,"k":2713,"found":754,"precision":0.2779211205307777,"recall":0.7126654064272212,"lift":2.3754637929676963}],"shap":[{"label":"contact channel","v":0.4285797483202938},{"label":"month contacted","v":0.2624066050618347},{"label":"previous campaign outcome","v":0.1679562484104104},{"label":"account balance","v":0.1457585116863333},{"label":"housing loan","v":0.1410050573673164},{"label":"day of month contacted","v":0.1357309240508657},{"label":"marital status","v":0.1354917885578375},{"label":"contacts this campaign","v":0.100358190548407}]},"post_call":{"model_note":"The best two models differ by 0.011 validation PR-AUC, within the fold-to-fold spread (0.011); the third is 0.017 behind. Treat the order among the leaders as tentative.","model":"hist_gradient_boosting","calibration":"sigmoid","threshold":0.1505790130285311,"metrics":{"pr_auc":0.6287995321998116,"roc_auc":0.9347691145851211,"precision":0.4554406696208764,"recall":0.8742911153119093,"f1":0.5988993201683392,"accuracy":0.8629879464779387,"balanced_accuracy":0.8678907048068626,"tp":925,"fp":1106,"fn":133,"tn":6879,"n_predicted_positive":2031,"prevalence":0.11699657193409267},"ci":{"pr_auc":[0.5980729864361374,0.6600865049449292],"roc_auc":[0.9281783351603489,0.9407701398477891],"precision":[0.4333166205994633,0.47555019100678536],"recall":[0.8544703282739641,0.8938392597103445]},"n_test":9043,"n_pos":1058,"models_val":[{"model":"hist_gradient_boosting","pr_auc":0.6463515164515339,"roc_auc":0.9413970900212524},{"model":"hist_gradient_boosting_tuned","pr_auc":0.6357703611722848,"roc_auc":0.939051661924984},{"model":"random_forest_tuned","pr_auc":0.629119081319547,"roc_auc":0.9361495912429774},{"model":"random_forest_balanced","pr_auc":0.6230102213941966,"roc_auc":0.9342151931462168},{"model":"logreg_baseline","pr_auc":0.5563375974233835,"roc_auc":0.91053811308818},{"model":"logreg_balanced","pr_auc":0.5484929443050367,"roc_auc":0.9129245021233396},{"model":"logreg_smote","pr_auc":0.5481314129093241,"roc_auc":0.911617185221104},{"model":"decision_tree_balanced","pr_auc":0.52570506891802,"roc_auc":0.8915948035011422}],"sweep":[{"t":0.02,"p":0.250599520383693,"r":0.9877126654064272,"f1":0.3997704667176741,"n":4170},{"t":0.03,"p":0.2855962544753511,"r":0.9801512287334594,"f1":0.4423117935593943,"n":3631},{"t":0.04,"p":0.3160159852443898,"r":0.9716446124763704,"f1":0.4769195082347483,"n":3253},{"t":0.05,"p":0.338559039359573,"r":0.9593572778827976,"f1":0.5004930966469427,"n":2998},{"t":0.06,"p":0.3574982231698649,"r":0.9508506616257087,"f1":0.5196280991735537,"n":2814},{"t":0.07,"p":0.3733233979135618,"r":0.947069943289225,"f1":0.535542490646713,"n":2684},{"t":0.08,"p":0.3870211102423768,"r":0.9357277882797732,"f1":0.547566371681416,"n":2558},{"t":0.09,"p":0.3994299674267101,"r":0.9272211720226844,"f1":0.5583380762663631,"n":2456},{"t":0.1,"p":0.4102997045166737,"r":0.9187145557655956,"f1":0.5672599941639919,"n":2369},{"t":0.11,"p":0.4226894437144108,"r":0.9120982986767486,"f1":0.5776713558814726,"n":2283},{"t":0.12,"p":0.4315408947130592,"r":0.9026465028355388,"f1":0.5839192907367777,"n":2213},{"t":0.13,"p":0.439365671641791,"r":0.8903591682419659,"f1":0.5883822610868208,"n":2144},{"t":0.14,"p":0.4479616306954436,"r":0.8827977315689981,"f1":0.5943366210626789,"n":2085},{"t":0.15,"p":0.4549926217412691,"r":0.8742911153119093,"f1":0.5985118084762213,"n":2033},{"t":0.16,"p":0.4628224582701062,"r":0.8648393194706995,"f1":0.6029654036243822,"n":1977},{"t":0.17,"p":0.4694616977225673,"r":0.8572778827977315,"f1":0.6066889632107023,"n":1932},{"t":0.18,"p":0.4752791068580542,"r":0.8449905482041588,"f1":0.6083701939435182,"n":1881},{"t":0.19,"p":0.4836423118865867,"r":0.8383742911153119,"f1":0.6134163208852006,"n":1834},{"t":0.2,"p":0.489432703003337,"r":0.831758034026465,"f1":0.6162464985994398,"n":1798},{"t":0.21,"p":0.5,"r":0.8270321361058601,"f1":0.6232193732193733,"n":1750},{"t":0.22,"p":0.5064252336448598,"r":0.8194706994328923,"f1":0.6259927797833935,"n":1712},{"t":0.23,"p":0.5131736526946108,"r":0.8100189035916824,"f1":0.6282991202346041,"n":1670},{"t":0.24,"p":0.5209876543209877,"r":0.7977315689981096,"f1":0.6303211351755041,"n":1620},{"t":0.25,"p":0.5275142314990512,"r":0.7882797731568998,"f1":0.6320575975748389,"n":1581},{"t":0.26,"p":0.5340687865022713,"r":0.777882797731569,"f1":0.633320507887649,"n":1541},{"t":0.27,"p":0.5386138613861386,"r":0.7712665406427222,"f1":0.6342790516906335,"n":1515},{"t":0.28,"p":0.5468013468013468,"r":0.7674858223062382,"f1":0.6386158081006685,"n":1485},{"t":0.29,"p":0.5511324639670556,"r":0.7589792060491494,"f1":0.6385685884691849,"n":1457},{"t":0.3,"p":0.5561797752808989,"r":0.7485822306238186,"f1":0.6381950040290089,"n":1424},{"t":0.31,"p":0.5636758321273516,"r":0.7362948960302458,"f1":0.6385245901639345,"n":1382},{"t":0.32,"p":0.5701559020044543,"r":0.725897920604915,"f1":0.6386694386694387,"n":1347},{"t":0.33,"p":0.5744843391902216,"r":0.7107750472589792,"f1":0.6354034643008027,"n":1309},{"t":0.34,"p":0.5764430577223089,"r":0.6984877126654064,"f1":0.6316239316239316,"n":1282},{"t":0.35,"p":0.5775656324582339,"r":0.6862003780718336,"f1":0.6272138228941685,"n":1257},{"t":0.36,"p":0.5833333333333334,"r":0.6748582230623819,"f1":0.6257668711656442,"n":1224},{"t":0.37,"p":0.5959595959595959,"r":0.6691871455576559,"f1":0.6304541406945681,"n":1188},{"t":0.38,"p":0.5930735930735931,"r":0.6474480151228733,"f1":0.6190691369182105,"n":1155},{"t":0.39,"p":0.5961027457927369,"r":0.6361058601134215,"f1":0.6154549611339735,"n":1129},{"t":0.4,"p":0.6012715712988193,"r":0.6257088846880907,"f1":0.6132468735525707,"n":1101},{"t":0.41,"p":0.6042830540037244,"r":0.6134215500945179,"f1":0.6088180112570356,"n":1074},{"t":0.42,"p":0.6082771896053898,"r":0.5973534971644613,"f1":0.6027658559847401,"n":1039},{"t":0.43,"p":0.6124876114965312,"r":0.5841209829867675,"f1":0.5979680696661829,"n":1009},{"t":0.44,"p":0.6155419222903885,"r":0.5689981096408318,"f1":0.5913555992141454,"n":978},{"t":0.45,"p":0.6171548117154811,"r":0.55765595463138,"f1":0.5858987090367428,"n":956},{"t":0.46,"p":0.6304824561403509,"r":0.5434782608695652,"f1":0.583756345177665,"n":912},{"t":0.47,"p":0.63718820861678,"r":0.5311909262759924,"f1":0.5793814432989691,"n":882},{"t":0.48,"p":0.6445497630331753,"r":0.5141776937618148,"f1":0.5720294426919033,"n":844},{"t":0.49,"p":0.6477132262051916,"r":0.4952741020793951,"f1":0.561328334226031,"n":809},{"t":0.5,"p":0.649810366624526,"r":0.4858223062381852,"f1":0.5559762033531639,"n":791},{"t":0.51,"p":0.6544980443285529,"r":0.4744801512287334,"f1":0.5501369863013699,"n":767},{"t":0.52,"p":0.6635262449528937,"r":0.4659735349716446,"f1":0.5474736257634647,"n":743},{"t":0.53,"p":0.6690340909090909,"r":0.4451795841209829,"f1":0.5346197502837684,"n":704},{"t":0.54,"p":0.6711309523809523,"r":0.4262759924385633,"f1":0.5213872832369942,"n":672},{"t":0.55,"p":0.671850699844479,"r":0.4083175803402646,"f1":0.5079365079365079,"n":643},{"t":0.56,"p":0.680327868852459,"r":0.3922495274102079,"f1":0.4976019184652278,"n":610},{"t":0.57,"p":0.6869565217391305,"r":0.3733459357277883,"f1":0.4837721984078383,"n":575},{"t":0.58,"p":0.6969147005444646,"r":0.3629489603024575,"f1":0.4773151025481665,"n":551},{"t":0.59,"p":0.7037735849056603,"r":0.3525519848771266,"f1":0.4697732997481108,"n":530},{"t":0.6,"p":0.7055335968379447,"r":0.3374291115311909,"f1":0.4565217391304347,"n":506},{"t":0.61,"p":0.7095435684647303,"r":0.3232514177693761,"f1":0.4441558441558441,"n":482},{"t":0.62,"p":0.7155361050328227,"r":0.3090737240075614,"f1":0.4316831683168317,"n":457},{"t":0.63,"p":0.715962441314554,"r":0.2882797731568998,"f1":0.4110512129380054,"n":426},{"t":0.64,"p":0.7171717171717171,"r":0.2684310018903592,"f1":0.390646492434663,"n":396},{"t":0.65,"p":0.7294429708222812,"r":0.2599243856332703,"f1":0.3832752613240418,"n":377},{"t":0.66,"p":0.7319884726224783,"r":0.2400756143667296,"f1":0.3615658362989324,"n":347},{"t":0.67,"p":0.7303030303030303,"r":0.2277882797731569,"f1":0.3472622478386167,"n":330},{"t":0.68,"p":0.7524752475247525,"r":0.2155009451795841,"f1":0.3350477590007347,"n":303},{"t":0.69,"p":0.7553191489361702,"r":0.2013232514177693,"f1":0.317910447761194,"n":282},{"t":0.7,"p":0.7595419847328244,"r":0.1880907372400756,"f1":0.3015151515151515,"n":262},{"t":0.71,"p":0.7573221757322176,"r":0.1710775047258979,"f1":0.2791056283731688,"n":239},{"t":0.72,"p":0.7601809954751131,"r":0.1587901701323251,"f1":0.2627052384675528,"n":221},{"t":0.73,"p":0.7632850241545893,"r":0.1493383742911153,"f1":0.2498023715415019,"n":207},{"t":0.74,"p":0.7611940298507462,"r":0.1446124763705104,"f1":0.2430500397140587,"n":201},{"t":0.75,"p":0.7624309392265194,"r":0.1304347826086956,"f1":0.2227602905569007,"n":181},{"t":0.76,"p":0.7763975155279503,"r":0.1181474480151228,"f1":0.2050861361771944,"n":161},{"t":0.77,"p":0.8013698630136986,"r":0.110586011342155,"f1":0.1943521594684385,"n":146},{"t":0.78,"p":0.7829457364341085,"r":0.0954631379962192,"f1":0.1701769165964616,"n":129},{"t":0.79,"p":0.7863247863247863,"r":0.0869565217391304,"f1":0.156595744680851,"n":117},{"t":0.8,"p":0.7864077669902912,"r":0.0765595463137996,"f1":0.1395348837209302,"n":103},{"t":0.81,"p":0.825,"r":0.0623818525519848,"f1":0.1159929701230228,"n":80},{"t":0.82,"p":0.855072463768116,"r":0.0557655954631379,"f1":0.1047027506654835,"n":69},{"t":0.83,"p":0.8627450980392157,"r":0.0415879017013232,"f1":0.0793507664562669,"n":51},{"t":0.84,"p":0.8780487804878049,"r":0.0340264650283553,"f1":0.0655141037306642,"n":41},{"t":0.85,"p":0.9032258064516128,"r":0.0264650283553875,"f1":0.0514233241505968,"n":31},{"t":0.86,"p":0.8888888888888888,"r":0.0151228733459357,"f1":0.0297397769516728,"n":18},{"t":0.87,"p":0.9230769230769232,"r":0.0113421550094517,"f1":0.0224089635854341,"n":13},{"t":0.88,"p":0.8888888888888888,"r":0.0075614366729678,"f1":0.0149953139643861,"n":9},{"t":0.89,"p":0.5,"r":0.0009451795841209,"f1":0.0018867924528301,"n":2},{"t":0.9,"p":0.5,"r":0.0009451795841209,"f1":0.0018867924528301,"n":2},{"t":0.91,"p":0.0,"r":0.0,"f1":0.0,"n":0},{"t":0.92,"p":0.0,"r":0.0,"f1":0.0,"n":0},{"t":0.93,"p":0.0,"r":0.0,"f1":0.0,"n":0},{"t":0.94,"p":0.0,"r":0.0,"f1":0.0,"n":0},{"t":0.95,"p":0.0,"r":0.0,"f1":0.0,"n":0},{"t":0.96,"p":0.0,"r":0.0,"f1":0.0,"n":0},{"t":0.97,"p":0.0,"r":0.0,"f1":0.0,"n":0},{"t":0.98,"p":0.0,"r":0.0,"f1":0.0,"n":0}],"ranking":"0111111111111110111110111111111111001111111011101111011101111101111111101000111110111100011011101111100110101111111100011011111111111111111111111011000101101001100011101011011011111101111110101001111110111111111101111000111110011011110110111001111111111110110101111101010101011111101101011111101101011101000100011001001001011110111111111111100011010101101111110110001100111111101101100000110001110111111101011100011111111100011110101101111000011101110111111111010100101110110011001100011111001101011011111011000111101111111101000101011111110010100100001000001110010011001111001111100001010111101011101110100001011010100111110010001100011101100101011101110100101111101101100010011101011111101101000011111100010011010101110011101111000110110111000100011010100001001001100110110101010101011001011011110110010010011001100110010111111011001101001100100011000110100010011101001101001111000101010010001100010100100111101111110010001010000001000000011000000011000110100100110101000111111100011010111011111000001110000000101110100101001011111100000100001011111000110101000001011101100101010110100000110100110110110111010001001001010010000001100111110001111100000001011110101011111101000111011110110000000010000010100001000000001100001000010100101110100000100010010100011011011010101001111000111001000000111000111001101100111101101011110000000000000101001100001000001010001110011010000001100000000000101000000010110000110110110000011010000000100100110111011000000010011100010010010000011010000000000000000000010000000010001010000100100001001010100100001000000000100010011100011010000100001000000000110000000110110110000101000000000101000000101100011010000000010010000001000001001000100000100100000101100000000010101000010000110000000000000010000110101001000000000000001000000000010000100000100000000000100000010011000000000000011000001000010000100100000001000000000001100001001000000000000001011000000100101010000010000001000000000010001001010010000000001010000100000000010000001100010000101001010000001000001100000000001000000000001001000000000001000000001000001000000000000001101000100000001100110100000000000000001000000100000000000000010110000000000000000011010100001100000000000000100000010000000000001100010000000110000000000000000000000011000000100001110000000000010000000001010000010000000000000000100000000000000000000100110000000000000000000100000001000001000000000000000000000010000000010011000000000000000000100100000000000100100000000010000000000000000000000000100000000100000000010000000100100000000000000000001000000000000000100010000000000000100000000000000011000000000000000000010000010010001000000001000010000000000000100000000000100000000000001001000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000010000000000000000000000000000000000001000000100000000000000000000010000000000000000000100000000000000100000000000000000000000000000000000000010000000000001000110000000000000000000000000000000000000100000000000000000000000000000001000000000000000000010000000000000000000001000000000000000000000000000000000000000000000000000000001000001000000000000000000000000000000000001000000000010000000000000000000001111000000000000000000000100000000000000000000000000000000000000000000000000000110000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000001000000010000000000000000000000000000001000001000010000000000000000000000000000000000000000000001000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000010000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000001000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000","campaign":[{"q":0.1,"k":905,"found":571,"precision":0.630939226519337,"recall":0.5396975425330813,"lift":5.392800969200723},{"q":0.2,"k":1809,"found":883,"precision":0.4881149806522941,"recall":0.834593572778828,"lift":4.172045151265308},{"q":0.3,"k":2713,"found":1002,"precision":0.3693328418724659,"recall":0.947069943289225,"lift":3.156783449010122}],"shap":[{"label":"last call duration (s)","v":1.3834831578873368},{"label":"contact channel","v":0.5875327437252768},{"label":"month contacted","v":0.4582920127317466},{"label":"housing loan","v":0.1959686822646096},{"label":"previous campaign outcome","v":0.1489524967660443},{"label":"day of month contacted","v":0.1461642736848189},{"label":"contacts this campaign","v":0.145750976549852},{"label":"account balance","v":0.1164308295520838}]}},"temporal":{"random_roc":0.8009465408321133,"time_roc":0.631428581615287,"prev":{"train":0.05039445550394456,"val":0.11789427117894272,"test":0.31582439455932765}}}</script>
+<script>
+"use strict";
+const D = JSON.parse(document.getElementById("data").textContent);
+const $ = (id) => document.getElementById(id);
+let sc = "pre_call";
+
+/* ---------- formatting & pure calculations ---------- */
+const f3 = (x) => x.toFixed(3);
+const pct = (x, d = 1) => (100 * x).toFixed(d) + "%";
+const int = (x) => Math.round(x).toLocaleString("en-US");
+const S = () => D.scenarios[sc];
+const nameOf = (m) => m.replace(/_/g, " ");
+
+function metricsAtThreshold(s, t) {
+  let best = s.sweep[0];
+  for (const r of s.sweep) if (Math.abs(r.t - t) < Math.abs(best.t - t)) best = r;
+  const tp = Math.round(best.r * s.n_pos);
+  return { t: best.t, precision: best.p, recall: best.r, f1: best.f1, flagged: best.n, tp, fp: best.n - tp, fn: s.n_pos - tp };
+}
+function cumulativeRanking(rank) {
+  const cum = new Array(rank.length);
+  let c = 0;
+  for (let i = 0; i < rank.length; i++) { if (rank.charCodeAt(i) === 49) c++; cum[i] = c; }
+  return cum;
+}
+function campaignAt(s, cum, q) {
+  const n = cum.length, k = Math.max(1, Math.min(n, Math.ceil(q * n - 1e-9)));
+  const found = cum[k - 1], prev = s.n_pos / n, precision = found / k;
+  return { k, found, precision, recall: found / s.n_pos, lift: precision / prev, random: k * prev };
+}
+
+/* ---------- SVG helpers ---------- */
+function chartFrame(w, h, m) {
+  const x = (v) => m.l + v * (w - m.l - m.r), y = (v) => h - m.b - v * (h - m.t - m.b);
+  let g = "";
+  for (const v of [0, 0.25, 0.5, 0.75, 1]) {
+    g += `<line class="axis" x1="${m.l}" x2="${w - m.r}" y1="${y(v)}" y2="${y(v)}"/>`;
+    g += `<text class="tick" x="${m.l - 6}" y="${y(v) + 4}" text-anchor="end">${v.toFixed(2).replace(/0$/, "")}</text>`;
+  }
+  return { x, y, g };
+}
+function path(pts, X, Y) { return pts.map((p, i) => (i ? "L" : "M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1)).join(" "); }
+
+function drawSweep(s, t) {
+  const w = 560, h = 280, fr = chartFrame(w, h, { l: 38, r: 12, t: 12, b: 28 });
+  const lo = 0.02, hi = 0.98, X = (v) => fr.x((v - lo) / (hi - lo));
+  let svg = `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Precision, recall and F1 against decision threshold">${fr.g}`;
+  for (const v of [0.2, 0.4, 0.6, 0.8]) svg += `<text class="tick" x="${X(v)}" y="${h - 8}" text-anchor="middle">${v}</text>`;
+  for (const [k, cls] of [["p", "l-blue"], ["r", "l-teal"], ["f1", "l-amber"]])
+    svg += `<path class="${cls}" fill="none" stroke-width="2.5" d="${path(s.sweep.map((r) => [r.t, r[k]]), X, fr.y)}"/>`;
+  svg += `<line class="l-grey" stroke-dasharray="4 4" x1="${X(s.threshold)}" x2="${X(s.threshold)}" y1="${fr.y(1)}" y2="${fr.y(0)}"/>`;
+  svg += `<line class="l-ink" stroke-width="2" x1="${X(t)}" x2="${X(t)}" y1="${fr.y(1)}" y2="${fr.y(0)}"/></svg>`;
+  $("sweep").innerHTML = svg;
+}
+function drawGains(s, cum, q) {
+  const w = 560, h = 280, fr = chartFrame(w, h, { l: 38, r: 12, t: 12, b: 28 }), n = cum.length, pts = [[0, 0]];
+  for (let i = 1; i <= 200; i++) { const k = Math.max(1, Math.round((i / 200) * n)); pts.push([k / n, cum[k - 1] / s.n_pos]); }
+  const X = (v) => fr.x(v);
+  let svg = `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Share of subscribers found against share of customers contacted">${fr.g}`;
+  for (const v of [0.25, 0.5, 0.75, 1]) svg += `<text class="tick" x="${X(v)}" y="${h - 8}" text-anchor="middle">${Math.round(v * 100)}%</text>`;
+  svg += `<path class="l-grey" fill="none" stroke-width="1.5" stroke-dasharray="5 4" d="M${X(0)} ${fr.y(0)} L${X(1)} ${fr.y(1)}"/>`;
+  svg += `<path class="l-teal" fill="none" stroke-width="2.5" d="${path(pts, X, fr.y)}"/>`;
+  const c = campaignAt(s, cum, q);
+  svg += `<line class="l-ink" stroke-width="2" x1="${X(q)}" x2="${X(q)}" y1="${fr.y(1)}" y2="${fr.y(0)}"/><circle class="f-teal" cx="${X(q)}" cy="${fr.y(c.recall)}" r="5"/></svg>`;
+  $("gains").innerHTML = svg;
+}
+function readout(el, items) { $(el).innerHTML = items.map(([k, v]) => `<div><b class="num">${v}</b><span>${k}</span></div>`).join(""); }
+function hbars(el, rows, max, selName) {
+  $(el).innerHTML = rows.map((r) => `<div class="bar${r.name === selName ? " sel" : ""}"><span class="n">${r.label}</span><span class="t"><i style="width:${(100 * r.v / max).toFixed(1)}%"></i></span><span class="v num">${f3(r.v)}</span></div>`).join("");
+}
+
+/* ---------- rendering ---------- */
+let cum = null;
+function render() {
+  const s = S(), m = s.metrics, ci = s.ci;
+  cum = cumulativeRanking(s.ranking);
+  $("ntest").textContent = int(s.n_test);
+  $("always-no").textContent = pct(1 - m.prevalence);
+  $("sc-pre").setAttribute("aria-pressed", sc === "pre_call");
+  $("sc-post").setAttribute("aria-pressed", sc === "post_call");
+  $("sc-note").className = "note" + (sc === "post_call" ? " warn" : "");
+  $("sc-note").innerHTML = sc === "pre_call"
+    ? "<b>Pre-call.</b> Uses only what is known before dialling, so this is the scenario for deciding whom to contact. Selected model: <b>" + nameOf(s.model) + "</b>, calibration: <b>" + s.calibration + "</b>, threshold <b>" + f3(s.threshold) + "</b>."
+    : "<b>Post-call.</b> Also uses call duration, which is only known after the call ends. The scores look much higher, but this model cannot be used to choose whom to call. Selected model: <b>" + nameOf(s.model) + "</b>, calibration: <b>" + s.calibration + "</b>.";
+  const stat = (k, v, c) => `<div class="card stat"><div class="k">${k}</div><div class="v num">${v}</div><div class="ci num">${c ? "95% CI " + f3(c[0]) + " to " + f3(c[1]) : "&nbsp;"}</div></div>`;
+  $("stats").innerHTML = stat("ROC-AUC", f3(m.roc_auc), ci.roc_auc) + stat("PR-AUC", f3(m.pr_auc), ci.pr_auc) + stat("Recall", f3(m.recall), ci.recall) + stat("Precision", f3(m.precision), ci.precision);
+  $("cm-cap").textContent = "Test set at threshold " + f3(s.threshold) + ". Rows are what really happened.";
+  $("cm").innerHTML = `<div></div><div class="h">predicted no</div><div class="h">predicted yes</div>
+    <div class="h">actually no</div><div class="c good"><b class="num">${int(m.tn)}</b>correctly left alone</div><div class="c bad"><b class="num">${int(m.fp)}</b>wasted calls</div>
+    <div class="h">actually yes</div><div class="c bad"><b class="num">${int(m.fn)}</b>missed subscribers</div><div class="c good"><b class="num">${int(m.tp)}</b>subscribers found</div>`;
+  $("plain").innerHTML = `Out of <b class="num">${int(s.n_pos)}</b> customers who really subscribed, the model flags <b class="num">${int(m.tp)}</b> (${pct(m.recall, 0)}). Of the <b class="num">${int(m.n_predicted_positive)}</b> customers it flags, ${pct(m.precision, 0)} actually subscribe, compared with a base rate of ${pct(m.prevalence)}.`;
+  const thrSlider = $("thr"); thrSlider.value = Math.min(0.98, Math.max(0.02, +s.threshold.toFixed(2)));
+  updateThreshold(); updateCampaign();
+  const rows = s.models_val.map((r) => ({ name: r.model, label: nameOf(r.model), v: r.pr_auc }));
+  hbars("model-bars", rows, Math.max(...rows.map((r) => r.v)) * 1.05, s.model.replace("_tuned", ""));
+  hbars("shap-bars", s.shap.map((r) => ({ name: "", label: r.label, v: r.v })), Math.max(...s.shap.map((r) => r.v)) * 1.05, "");
+  $("model-note").textContent = s.model_note;
+  $("camp-body").innerHTML = s.campaign.map((c) => `<tr><td>Top ${pct(c.q, 0)}</td><td class="r num">${int(c.k)}</td><td class="r num">${int(c.found)}</td><td class="r num">${pct(c.precision)}</td><td class="r num">${pct(c.recall)}</td><td class="r num">${c.lift.toFixed(2)}x</td></tr>`).join("");
+}
+function updateThreshold() {
+  const s = S(), t = parseFloat($("thr").value), r = metricsAtThreshold(s, t);
+  $("thr-val").textContent = t.toFixed(2);
+  drawSweep(s, t);
+  readout("thr-read", [["precision", pct(r.precision)], ["recall", pct(r.recall)], ["customers flagged", int(r.flagged)], ["wasted calls", int(r.fp)], ["missed subscribers", int(r.fn)]]);
+}
+function updateCampaign() {
+  const s = S(), q = parseInt($("q").value, 10) / 100, c = campaignAt(s, cum, q);
+  $("q-val").textContent = Math.round(q * 100) + "%";
+  drawGains(s, cum, q);
+  readout("q-read", [["customers selected", int(c.k)], ["subscribers found", int(c.found)], ["random would find", int(c.random)], ["precision", pct(c.precision)], ["recall", pct(c.recall)], ["lift", c.lift.toFixed(2) + "x"]]);
+}
+function renderStatic() {
+  $("t-random").textContent = f3(D.temporal.random_roc);
+  $("t-time").textContent = f3(D.temporal.time_roc);
+  const p = D.temporal.prev;
+  $("t-note").textContent = "The subscription rate also drifts across the file: " + pct(p.train) + " in the first 60% of rows, " + pct(p.val) + " in the next 20% and " + pct(p.test) + " in the last 20%. ROC-AUC does not depend on the base rate, so the two scores are directly comparable. Headline results from a random split are therefore best read as optimistic.";
+  const months = D.dataset.months, mx = Math.max(...months.map((m) => m.rate));
+  $("months").innerHTML = months.map((m) => `<div class="m"><span class="num">${Math.round(100 * m.rate)}%</span><i style="height:${(100 * m.rate / mx * 0.78).toFixed(1)}%" title="${m.category}: ${pct(m.rate)} of ${int(m.n)} contacts"></i><span>${m.category}</span></div>`).join("") +
+    `<div class="ref" style="bottom:calc(${(100 * D.dataset.prevalence / mx * 0.78).toFixed(1)}% + 18px)" title="overall rate ${pct(D.dataset.prevalence)}"></div>`;
+  if (D.n_tests) $("tests-li").textContent = D.n_tests + " automated tests cover data, preprocessing, training, prediction, explanations and every app page.";
+  for (const id of ["lnk-repo", "lnk-repo2"]) { $(id).href = D.repo; $(id).rel = "noopener"; }
+  for (const id of ["lnk-colab", "lnk-colab2"]) { $(id).href = D.colab; $(id).rel = "noopener"; }
+  $("lnk-data").href = D.dataset_url; $("lnk-data").rel = "noopener";
+  for (const id of ["cmd-win", "cmd-nix"]) $(id).textContent = $(id).textContent.replace("https://github.com/Nischay-S/Bank-Term-Deposit", D.repo);
+}
+
+/* ---------- events ---------- */
+function wire() {
+  $("sc-pre").addEventListener("click", () => { sc = "pre_call"; render(); });
+  $("sc-post").addEventListener("click", () => { sc = "post_call"; render(); });
+  $("thr").addEventListener("input", updateThreshold);
+  $("q").addEventListener("input", updateCampaign);
+  $("thr-reset").addEventListener("click", () => { $("thr").value = S().threshold.toFixed(2); updateThreshold(); });
+  $("theme").addEventListener("click", () => {
+    const root = document.documentElement, dark = matchMedia("(prefers-color-scheme: dark)").matches;
+    const cur = root.dataset.theme || (dark ? "dark" : "light");
+    root.dataset.theme = cur === "dark" ? "light" : "dark";
+  });
+  document.querySelectorAll("[data-copy]").forEach((b) => b.addEventListener("click", async () => {
+    const text = $(b.dataset.copy).textContent;
+    try { await navigator.clipboard.writeText(text); b.textContent = "Copied"; }
+    catch (e) { const r = document.createRange(); r.selectNodeContents($(b.dataset.copy)); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); b.textContent = "Selected: press Ctrl+C"; }
+    setTimeout(() => { b.textContent = "Copy commands"; }, 2200);
+  }));
+}
+renderStatic(); wire(); render();
+</script>
+</body>
+</html>
